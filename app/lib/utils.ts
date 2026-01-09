@@ -1,52 +1,70 @@
-import { type ClassValue, clsx } from "clsx";
+import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+    return twMerge(clsx(inputs));
 }
 
-export const formatDate = (date: string) => {
-  return dayjs(date).format("MMMM D, YYYY");
+export const formatDate = (dateString: string): string => {
+    return dayjs(dateString).format("MMMM DD, YYYY");
 };
 
-export const formatKey = (key: string) => {
-  return key
-    .split(/(?=[A-Z])/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
+export function parseMarkdownToJson(markdownText: string): unknown | null {
+    const regex = /```json\n([\s\S]+?)\n```/;
+    const match = markdownText.match(regex);
 
-export const getFirstWord = (text: string) => {
-  return text.trim().split(/\s+/)[0];
-};
+    if (match && match[1]) {
+        try {
+            return JSON.parse(match[1]);
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+            return null;
+        }
+    }
+    console.error("No valid JSON found in markdown text.");
+    return null;
+}
+
+export function parseTripData(jsonString: string): Trip | null {
+    try {
+        const data: Trip = JSON.parse(jsonString);
+
+        return data;
+    } catch (error) {
+        console.error("Failed to parse trip data:", error);
+        return null;
+    }
+}
+
+export function getFirstWord(input: string = ""): string {
+    return input.trim().split(/\s+/)[0] || "";
+}
 
 export const calculateTrendPercentage = (
-  countThisMonth: number,
-  countLastMonth: number
-) => {
-  if (countLastMonth === 0) {
-    return { trend: "no-change", percentage: 0 };
-  }
+    countOfThisMonth: number,
+    countOfLastMonth: number
+): TrendResult => {
+    if (countOfLastMonth === 0) {
+        return countOfThisMonth === 0
+            ? { trend: "no change", percentage: 0 }
+            : { trend: "increment", percentage: 100 };
+    }
 
-  const change = countThisMonth - countLastMonth;
-  const percentage = (Math.abs(change) / countLastMonth) * 100;
+    const change = countOfThisMonth - countOfLastMonth;
+    const percentage = Math.abs((change / countOfLastMonth) * 100);
 
-  if (change > 0) {
-    return { trend: "increment", percentage };
-  } else if (change < 0) {
-    return { trend: "decrement", percentage };
-  } else {
-    return { trend: "no-change", percentage: 0 };
-  }
+    if (change > 0) {
+        return { trend: "increment", percentage };
+    } else if (change < 0) {
+        return { trend: "decrement", percentage };
+    } else {
+        return { trend: "no change", percentage: 0 };
+    }
 };
 
-export const parseMarkdownToJSON = (markdown: string) => {
-  try {
-    const cleanedMarkdown = markdown.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    return JSON.parse(cleanedMarkdown);
-  } catch (error) {
-    console.error("Error parsing markdown to JSON:", error);
-    return null;
-  }
+export const formatKey = (key: keyof TripFormData) => {
+    return key
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (str) => str.toUpperCase());
 };
