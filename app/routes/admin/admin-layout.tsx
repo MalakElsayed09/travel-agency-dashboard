@@ -1,40 +1,76 @@
 import { Outlet, redirect } from "react-router";
-import { account } from "~/appwrite/client";
-import { getExistingUser, storeUserData } from "~/appwrite/oauth";
-import type { Route } from "./+types/admin-layout";
+import { useEffect, useState } from "react";
 
+import { MobileSidebar, NavItems } from "../../../components";
+import {
+  getExistingUser,
+  storeUserData,
+  getSafeAccountUser,
+} from "~/appwrite/auth";
+
+/* -----------------------------------------------------
+   CLIENT LOADER (ADMIN PROTECTION)
+----------------------------------------------------- */
 export async function clientLoader() {
   try {
-    const user = await account.get();
-    if (!user?.$id) return redirect("/sign-in");
+    // ✅ SAFE: does not throw for guests
+    const user = await getSafeAccountUser();
+
+    if (!user) {
+      throw redirect("/sign-in");
+    }
 
     const existingUser = await getExistingUser(user.$id);
 
-    if (existingUser?.status === "user") {
-      return redirect("/");
+    // 🚫 Block non-admin users
+    if (existingUser && existingUser.status === "user") {
+      throw redirect("/");
     }
 
-    return existingUser?.$id ? existingUser : await storeUserData(user);
+    // ✅ First-time OAuth login
+    if (!existingUser) {
+      const createdUser = await storeUserData();
+      return createdUser;
+    }
+
+    return existingUser;
   } catch (error) {
-    console.error("Error in client loader:", error);
-    return redirect("/sign-in");
+    console.error("Admin loader error:", error);
+    throw redirect("/sign-in");
   }
 }
 
-export default function AdminLayout({ loaderData }: Route.ComponentProps) {
+/* -----------------------------------------------------
+   ADMIN LAYOUT
+----------------------------------------------------- */
+const AdminLayout = () => {
+  const [SidebarComponent, setSidebarComponent] =
+    useState<React.ComponentType<any> | null>(null);
+
+  // ✅ Client-only Syncfusion import (SSR-safe)
+  useEffect(() => {
+    import("@syncfusion/ej2-react-navigations").then((mod) => {
+      setSidebarComponent(() => mod.SidebarComponent);
+    });
+  }, []);
+
   return (
     <div className="admin-layout">
-      <aside className="w-full max-w-[270px] hidden md:block">
-        <div className="sidebar">Sidebar</div>
+      <MobileSidebar />
+
+      <aside className="w-full max-w-[270px] hidden lg:block">
+        {SidebarComponent && (
+          <SidebarComponent width={270} enableGestures={false}>
+            <NavItems />
+          </SidebarComponent>
+        )}
       </aside>
 
-      <aside className="md:hidden">
-        <div className="mobile-sidebar">Mobile Sidebar</div>
-      </aside>
-
-      <aside className="children">
+      <main className="children">
         <Outlet />
-      </aside>
+      </main>
     </div>
   );
-}
+};
+
+export default AdminLayout;
