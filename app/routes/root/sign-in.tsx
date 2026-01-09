@@ -1,19 +1,40 @@
 import { Link, redirect } from "react-router";
-import { loginWithGoogle } from "~/appwrite/oauth";
+import { loginWithGoogle } from "~/appwrite/auth";
 import { account } from "~/appwrite/client";
-import type { Route } from "./+types/sign-in";
+import { useState, useEffect } from "react";
 
+/* -----------------------------------------------------
+   CLIENT LOADER (SAFE FOR GUESTS)
+----------------------------------------------------- */
 export async function clientLoader() {
   try {
     const user = await account.get();
-    if (user?.$id) return redirect("/dashboard");
-    return null;
+
+    if (user?.$id) {
+      return redirect("/");
+    }
   } catch {
-    return null;
+    // User is not logged in — this is expected
   }
+
+  return null;
 }
 
-export default function SignIn({ loaderData }: Route.ComponentProps) {
+/* -----------------------------------------------------
+   COMPONENT
+----------------------------------------------------- */
+const SignIn = () => {
+  const [mounted, setMounted] = useState(false);
+  const [ButtonComponent, setButtonComponent] = useState<any>(null);
+
+  useEffect(() => {
+    setMounted(true);
+
+    import("@syncfusion/ej2-react-buttons").then((module) => {
+      setButtonComponent(() => module.ButtonComponent);
+    });
+  }, []);
+
   return (
     <main className="auth">
       <section className="size-full glassmorphism flex-center px-6">
@@ -26,33 +47,55 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
                 className="size-[30px]"
               />
             </Link>
-            <h1 className="p28-bold text-dark-100">Tour Visto</h1>
+            <h1 className="p-28-bold text-dark-100">Tourvisto</h1>
           </header>
 
           <article>
-            <h2 className="p28-semibold text-dark-100 text-center">
+            <h2 className="p-28-semibold text-dark-100 text-center">
               Start Your Travel Journey
             </h2>
-            <p className="p18-regular text-center text-gray-100 !leading-7">
+
+            <p className="p-18-regular text-center text-gray-100 !leading-7">
               Sign in with Google to manage destinations, itineraries, and user
-              activity with ease
+              activity with ease.
             </p>
           </article>
 
-          <button
-            onClick={loginWithGoogle}
-            type="button"
-            className="button-class !h-11 !w-full flex items-center justify-center gap-2"
-          >
-            <img
-              src="/assets/icons/google.svg"
-              alt="Google"
-              className="size-5"
-            />
-            <span className="p18-semibold text-white">Sign in with Google</span>
-          </button>
+          {mounted && ButtonComponent ? (
+            <ButtonComponent
+              type="button"
+              className="button-class !h-11 !w-full"
+              onClick={loginWithGoogle}
+            >
+              <img
+                src="/assets/icons/google.svg"
+                className="size-5"
+                alt="google"
+              />
+              <span className="p-18-semibold text-white">
+                Sign in with Google
+              </span>
+            </ButtonComponent>
+          ) : (
+            <button
+              type="button"
+              className="button-class !h-11 !w-full flex items-center justify-center gap-2"
+              onClick={loginWithGoogle}
+            >
+              <img
+                src="/assets/icons/google.svg"
+                className="size-5"
+                alt="google"
+              />
+              <span className="p-18-semibold text-white">
+                Sign in with Google
+              </span>
+            </button>
+          )}
         </div>
       </section>
     </main>
   );
-}
+};
+
+export default SignIn;

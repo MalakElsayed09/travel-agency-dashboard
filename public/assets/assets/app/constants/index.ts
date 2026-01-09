@@ -1,4 +1,4 @@
-import type { AxisModel } from "@syncfusion/ej2-react-charts";
+
 
 export const sidebarItems = [
   {
@@ -21,43 +21,13 @@ export const sidebarItems = [
   },
 ];
 
-export const chartOneData: object[] = [
-  {
-    x: "Jan",
-    y1: 0.5,
-    y2: 1.5,
-    y3: 0.7,
-  },
-  {
-    x: "Feb",
-    y1: 0.8,
-    y2: 1.2,
-    y3: 0.9,
-  },
-  {
-    x: "Mar",
-    y1: 1.2,
-    y2: 1.8,
-    y3: 1.5,
-  },
-  {
-    x: "Apr",
-    y1: 1.5,
-    y2: 2.0,
-    y3: 1.8,
-  },
-  {
-    x: "May",
-    y1: 1.8,
-    y2: 2.5,
-    y3: 2.0,
-  },
-  {
-    x: "Jun",
-    y1: 2.0,
-    y2: 2.8,
-    y3: 2.5,
-  },
+export const chartOneData = [
+  { x: "Jan", y1: 0.5, y2: 1.5, y3: 0.7 },
+  { x: "Feb", y1: 0.8, y2: 1.2, y3: 0.9 },
+  { x: "Mar", y1: 1.2, y2: 1.8, y3: 1.5 },
+  { x: "Apr", y1: 1.5, y2: 2.0, y3: 1.8 },
+  { x: "May", y1: 1.8, y2: 2.5, y3: 2.0 },
+  { x: "Jun", y1: 2.0, y2: 2.8, y3: 2.5 },
 ];
 
 export const travelStyles = [
@@ -82,9 +52,7 @@ export const interests = [
 ];
 
 export const budgetOptions = ["Budget", "Mid-range", "Luxury", "Premium"];
-
 export const groupTypes = ["Solo", "Couple", "Family", "Friends", "Business"];
-
 export const footers = ["Terms & Condition", "Privacy Policy"];
 
 export const selectItems = [
@@ -101,21 +69,26 @@ export const comboBoxItems = {
   budget: budgetOptions,
 } as Record<keyof TripFormData, string[]>;
 
-export const userXAxis: AxisModel = { valueType: "Category", title: "Day" };
-export const useryAxis: AxisModel = {
+/* ✅ AXIS CONFIGS — PLAIN OBJECTS ONLY */
+export const userXAxis = {
+  valueType: "Category",
+  title: "Day",
+};
+
+export const useryAxis = {
   minimum: 0,
   maximum: 10,
   interval: 2,
   title: "Count",
 };
 
-export const tripXAxis: AxisModel = {
+export const tripXAxis = {
   valueType: "Category",
   title: "Travel Styles",
   majorGridLines: { width: 0 },
 };
 
-export const tripyAxis: AxisModel = {
+export const tripyAxis = {
   minimum: 0,
   maximum: 10,
   interval: 2,
@@ -123,16 +96,16 @@ export const tripyAxis: AxisModel = {
 };
 
 export const CONFETTI_SETTINGS = {
-  particleCount: 200, // Number of confetti pieces
-  spread: 60, // Spread of the confetti burst
-  colors: ["#ff0", "#ff7f00", "#ff0044", "#4c94f4", "#f4f4f4"], // Confetti colors
-  decay: 0.95, // Gravity decay of the confetti
+  particleCount: 200,
+  spread: 60,
+  colors: ["#ff0", "#ff7f00", "#ff0044", "#4c94f4", "#f4f4f4"],
+  decay: 0.95,
 };
 
 export const LEFT_CONFETTI = {
   ...CONFETTI_SETTINGS,
-  angle: 45, // Direction of the confetti burst (90 degrees is top)
-  origin: { x: 0, y: 1 }, // Center of the screen
+  angle: 45,
+  origin: { x: 0, y: 1 },
 };
 
 export const RIGHT_CONFETTI = {
